@@ -2,6 +2,7 @@ import argparse
 import os
 import pandas as pd
 import sys
+import time
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -302,14 +303,17 @@ def main():
     best_top1_accuracy = 0.0
 
     for epoch in range(begin_epoch, CONFIG.max_epoch):
+
+        start_time = time.time()
+
         # training
         train_loss = train(
-            model, train_loader, criterion, optimizer, CONFIG, device)
+            model, epoch, train_loader, train_sampler, criterion, optimizer, CONFIG, device)
         train_losses.append(train_loss)
 
         # validation
         val_loss, top1, top5 = validation(
-            model, val_loader, criterion, CONFIG, device)
+            model, epoch, val_loader, val_sampler, criterion, CONFIG, device)
 
         if CONFIG.optimizer == 'SGD':
             scheduler.step(val_loss)
@@ -366,8 +370,8 @@ def main():
         log.to_csv(os.path.join(CONFIG.result_path, 'log.csv'), index=False)
 
         print(
-            'epoch: {}\tloss train: {:.5f}\tloss val: {:.5f}\ttop1_accuracy: {:.5f}\ttop5_accuracy: {:.5f}'
-            .format(epoch, train_losses[-1], val_losses[-1], top1_accuracy[-1], top5_accuracy[-1])
+            'elapsed time: {}\tepoch: {}\tloss train: {:.5f}\tloss val: {:.5f}\ttop1_accuracy: {:.5f}\ttop5_accuracy: {:.5f}'
+            .format(time.time() - start_time, epoch, train_losses[-1], val_losses[-1], top1_accuracy[-1], top5_accuracy[-1])
         )
 
     torch.save(

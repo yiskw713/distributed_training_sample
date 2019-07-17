@@ -1,5 +1,4 @@
-model: resnet18
-metric: None
+model: resnet50
 
 class_weight: True    # if you use class weight to calculate cross entropy or not
 writer_flag: True      # if you use tensorboardx or not

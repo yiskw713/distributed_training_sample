@@ -1,7 +1,5 @@
-# Action Recognition with metric learning
-This repo is to verify if metric learning method is useful in action recongnition with 3DCNN.
-
-The result is coming soon.
+# Distributed Training
+This repo is sample implementation of distributed training with kinetics 400 / 700.
 
 ## Requirements
 * python 3.x
@@ -14,7 +12,7 @@ The result is coming soon.
 * PyYAML
 * addict
 * tensorboardX
-* adabound
+* horovod
 * (accimage)
 
 ## Dataset
@@ -64,12 +62,7 @@ val_csv: ./dataset/kinetics_400_val.csv
 result_path: ./result/resnet18/fc
 ```
 
-## Result
-Coming Soon
 
 ## References
 * [3D-ResNets-PyTorch](https://github.com/kenshohara/3D-ResNets-PyTorch)
-* [adacos](https://github.com/4uiiurz1/pytorch-adacos)
-
-# TODO
-* add config as to jpg or hdvu or mp4
+* [horovod](https://github.com/horovod/horovod)
