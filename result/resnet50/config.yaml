@@ -23,4 +23,4 @@ final_lr: 0.1         # final learning rate for AdaBound
 dataset_dir: /groups1/gaa50131/datasets/videos_400_jpg
 train_csv: ./dataset/kinetics_400_train.csv
 val_csv: ./dataset/kinetics_400_val.csv
-result_path: ./result/resnet18/fc
+result_path: ./result/resnet50/
