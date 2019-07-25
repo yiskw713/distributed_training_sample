@@ -45,7 +45,7 @@ def get_arguments():
     return parser.parse_args()
 
 
-def train(model, epoch, train_loader, train_sampler, criterion, optimizer, config, device):
+def train(model, epoch, train_loader, train_sampler, criterion, optimizer):
     model.train()
 
     # Horovod: set epoch to sampler for shuffling.
@@ -55,8 +55,8 @@ def train(model, epoch, train_loader, train_sampler, criterion, optimizer, confi
     for sample in train_loader:
         x = sample['clip']
         t = sample['cls_id']
-        x = x.to(device)
-        t = t.to(device)
+        x = x.cuda()
+        t = t.cuda()
 
         h = model(x)
         loss = criterion(h, t)
@@ -94,7 +94,7 @@ def metric_average(val, name):
     return avg_tensor.item()
 
 
-def validation(model, epoch, val_loader, val_sampler, criterion, config, device):
+def validation(model, epoch, val_loader, val_sampler, criterion, config):
     model.eval()
     val_loss = 0.0
     top1 = 0.0
@@ -103,9 +103,9 @@ def validation(model, epoch, val_loader, val_sampler, criterion, config, device)
     with torch.no_grad():
         for sample in val_loader:
             x = sample['clip']
-            x = x.to(device)
+            x = x.cuda()
             t = sample['cls_id']
-            t = t.to(device)
+            t = t.cuda()
 
             h = model(x)
 
@@ -137,7 +137,6 @@ def main():
 
     # cuda
     if torch.cuda.is_available():
-        device = 'cuda'
         # Pin GPU to be used to process local rank (one GPU per process)
         torch.cuda.set_device(hvd.local_rank())
         torch.cuda.manual_seed(args.seed)
@@ -216,8 +215,8 @@ def main():
         print('resnet18 will be used as a model.')
         model = resnet.generate_model(18, n_classes=CONFIG.n_classes)
 
-    # send models to device
-    model.to(device)
+    # send models to cuda
+    model.cuda()
 
     # set optimizer, lr_scheduler
     if CONFIG.optimizer == 'Adam':
@@ -290,7 +289,7 @@ def main():
 
     # criterion for loss
     if CONFIG.class_weight:
-        criterion = nn.CrossEntropyLoss(weight=get_class_weight().to(device))
+        criterion = nn.CrossEntropyLoss(weight=get_class_weight().cuda())
     else:
         criterion = nn.CrossEntropyLoss()
 
@@ -308,12 +307,12 @@ def main():
 
         # training
         train_loss = train(
-            model, epoch, train_loader, train_sampler, criterion, optimizer, CONFIG, device)
+            model, epoch, train_loader, train_sampler, criterion, optimizer, CONFIG)
         train_losses.append(train_loss)
 
         # validation
         val_loss, top1, top5 = validation(
-            model, epoch, val_loader, val_sampler, criterion, CONFIG, device)
+            model, epoch, val_loader, val_sampler, criterion, CONFIG)
 
         if CONFIG.optimizer == 'SGD':
             scheduler.step(val_loss)
